@@ -602,7 +602,7 @@
       <div class="signal-metrics">
         <div class="metric-col">
           <div class="metric-title">ENTRY</div>
-          <div class="metric-value" id="entryTimeText">15:11:00</div>
+          <div class="metric-value" id="entryTimeText">00:00:00</div>
           <div class="metric-sub">Thailand GMT+7</div>
         </div>
         <div class="metric-col">
@@ -716,7 +716,38 @@
     let wins = 0;
     let losses = 0;
 
-    // 3. Countdown Timer Function
+    // 3. Get Real-Time Bangkok (GMT+7) Date Object
+    function getBangkokNow() {
+      const now = new Date();
+      const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
+      return new Date(utcMs + (7 * 3600000));
+    }
+
+    // 4. Calculate Real Next Entry Time (GMT+7) & Exact Seconds Remaining
+    function getNextEntryTimeBangkok() {
+      const bkkDate = getBangkokNow();
+      const currentSec = bkkDate.getSeconds();
+
+      // ถ้าเหลือเวลาน้อยกว่า 10 วินาที ให้ขยับไปเข้าต้นนาทีถัดไปอีก 1 นาที (รวม ~1 นาทีกว่า) เพื่อไม่ให้กดเข้าออเดอร์ไม่ทัน
+      const addMins = currentSec > 50 ? 2 : 1;
+      const targetTime = new Date(bkkDate.getTime());
+      targetTime.setMinutes(targetTime.getMinutes() + addMins);
+      targetTime.setSeconds(0, 0);
+
+      const hh = String(targetTime.getHours()).padStart(2, '0');
+      const mm = String(targetTime.getMinutes()).padStart(2, '0');
+      const ss = String(targetTime.getSeconds()).padStart(2, '0');
+
+      const diffMs = targetTime.getTime() - bkkDate.getTime();
+      const secToEntry = Math.max(1, Math.round(diffMs / 1000));
+
+      return {
+        formattedTime: `${hh}:${mm}:${ss}`,
+        secondsUntil: secToEntry
+      };
+    }
+
+    // 5. Countdown Timer Function
     function updateCountdownUI() {
       const mins = String(Math.floor(secondsRemaining / 60)).padStart(2, '0');
       const secs = String(secondsRemaining % 60).padStart(2, '0');
@@ -748,33 +779,12 @@
       }, 1000);
     }
 
-    // Initialize default countdown (35s like screenshot)
-    startCountdown(35);
+    // ตั้งค่าเวลา ENTRY และตัวนับถอยหลังให้ตรงกับเวลาจริง (GMT+7) ตั้งแต่เปิดแอป
+    const initialEntry = getNextEntryTimeBangkok();
+    entryTimeText.textContent = initialEntry.formattedTime;
+    startCountdown(initialEntry.secondsUntil);
 
-    // 4. Get Bangkok (GMT+7) Next Minute Entry Time
-    function getNextEntryTimeBangkok() {
-      const now = new Date();
-      // Convert to UTC then add 7 hours for Thailand GMT+7
-      const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
-      const bkkDate = new Date(utcMs + (7 * 3600000));
-
-      const currentSec = bkkDate.getSeconds();
-      // Target next whole minute (if remaining < 10s, jump +2 mins so user has time)
-      const addMins = currentSec > 48 ? 2 : 1;
-      bkkDate.setMinutes(bkkDate.getMinutes() + addMins);
-      bkkDate.setSeconds(0);
-
-      const hh = String(bkkDate.getHours()).padStart(2, '0');
-      const mm = String(bkkDate.getMinutes()).padStart(2, '0');
-      const secToEntry = (addMins * 60) - currentSec;
-
-      return {
-        formattedTime: `${hh}:${mm}:00`,
-        secondsUntil: secToEntry
-      };
-    }
-
-    // 5. Step Progress Helper
+    // 6. Step Progress Helper
     function setStepProgress(stepIndex) {
       const widths = ['0%', '33.3%', '66.6%', '100%'];
       stepsFill.style.width = widths[stepIndex];
@@ -784,7 +794,7 @@
       });
     }
 
-    // 6. Scan Execution Flow
+    // 7. Scan Execution Flow
     scanBtn.addEventListener('click', () => {
       if (isScanning) return;
       isScanning = true;
@@ -842,7 +852,7 @@
       startCountdown(entryData.secondsUntil);
     }
 
-    // 7. Interactive Session Results (Tap Wins/Losses to track)
+    // 8. Interactive Session Results (Tap Wins/Losses to track)
     function updateSessionStats() {
       winsCountEl.textContent = wins;
       lossesCountEl.textContent = losses;
