@@ -11,11 +11,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-dark: #0e0e11;
-      --card-bg: #16161b;
-      --card-border: #25252d;
+      --bg-dark: #0c0c0f;
+      --card-bg: #15151a;
+      --card-border: #24242c;
       --orange-primary: #ff9914;
-      --orange-glow: rgba(255, 153, 20, 0.35);
+      --orange-glow: rgba(255, 153, 20, 0.36);
       --green-call: #10b981;
       --green-bg: rgba(16, 185, 129, 0.14);
       --red-put: #ff4b55;
@@ -46,15 +46,15 @@
     .app-container {
       width: 100%;
       max-width: 440px;
-      padding: 14px 18px 28px;
+      padding: 12px 16px 32px;
       display: flex;
       flex-direction: column;
       align-items: center;
       position: relative;
     }
 
-    /* Top Header */
-    .header {
+    /* Top Mini App Bar */
+    .top-bar {
       width: 100%;
       display: flex;
       justify-content: space-between;
@@ -62,7 +62,7 @@
       margin-bottom: 12px;
     }
 
-    .header-btn {
+    .top-btn {
       width: 34px;
       height: 34px;
       border-radius: 50%;
@@ -73,47 +73,255 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: background 0.2s;
     }
 
-    .header-btn:active {
-      background: rgba(255, 255, 255, 0.22);
-    }
-
-    .header-title {
+    .top-title {
       text-align: center;
     }
 
-    .header-title h1 {
-      font-size: 16px;
+    .top-title h1 {
+      font-size: 15px;
       font-weight: 700;
-      letter-spacing: 0.2px;
       color: #f4f4f6;
     }
 
-    .header-title span {
+    .top-title span {
       display: block;
-      font-size: 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Signal Desk Header Card */
+    .desk-header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .brand-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255, 153, 20, 0.55);
+      background: #1a1612;
+      color: var(--orange-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .brand-name {
+      font-size: 15px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.15;
+    }
+
+    .brand-sub {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
       color: var(--text-muted);
       margin-top: 1px;
+    }
+
+    .desk-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .admin-badge {
+      font-size: 9.5px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: var(--orange-primary);
+      background: rgba(255, 153, 20, 0.12);
+      border: 1px solid rgba(255, 153, 20, 0.35);
+      border-radius: 8px;
+      padding: 4px 7px;
+    }
+
+    .live-clock-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10.5px;
+      font-weight: 600;
+      color: #e4e4ec;
+      background: #16161c;
+      border: 1px solid #262630;
+      border-radius: 10px;
+      padding: 5px 8px;
+      white-space: nowrap;
+    }
+
+    /* Pair Selector Box */
+    .pair-selector-wrap {
+      width: 100%;
+      position: relative;
+      margin-bottom: 10px;
+      z-index: 20;
+    }
+
+    .pair-box {
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .pair-box:active {
+      border-color: rgba(255, 153, 20, 0.5);
+    }
+
+    .pair-left {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+
+    .flag-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #1f242d;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .pair-category {
+      font-size: 10.5px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .pair-title-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 1px;
+    }
+
+    .pair-name {
+      font-size: 15px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .otc-tag {
+      font-size: 9px;
+      font-weight: 800;
+      color: var(--orange-primary);
+      background: rgba(255, 153, 20, 0.15);
+      border: 1px solid rgba(255, 153, 20, 0.35);
+      border-radius: 5px;
+      padding: 1px 5px;
+    }
+
+    .pair-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      background: #191920;
+      border: 1px solid #2e2e3a;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.65);
+    }
+
+    .pair-dropdown.open {
+      display: block;
+    }
+
+    .pair-option {
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: #e4e4ec;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .pair-option:last-child {
+      border-bottom: none;
+    }
+
+    .pair-option:hover {
+      background: rgba(255, 153, 20, 0.12);
+    }
+
+    /* Timeframe Switcher (1m / 3m / 5m / 15m) */
+    .tf-bar {
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 5px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      margin-bottom: 10px;
+    }
+
+    .tf-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 9px 0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tf-btn.active {
+      background: var(--orange-primary);
+      color: #141210;
+      box-shadow: 0 2px 12px rgba(255, 153, 20, 0.35);
     }
 
     /* Central Scan Button Section */
     .scanner-wrapper {
       position: relative;
-      width: 220px;
-      height: 220px;
+      width: 214px;
+      height: 214px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 6px 0 12px;
+      margin: 4px 0 10px;
     }
 
-    /* Outer Ticks Ring */
     .ticks-ring {
       position: absolute;
-      width: 210px;
-      height: 210px;
+      width: 204px;
+      height: 204px;
       border-radius: 50%;
       border: 2px dashed rgba(255, 153, 20, 0.22);
       transition: transform 0.5s ease;
@@ -121,29 +329,27 @@
 
     .scanning .ticks-ring {
       animation: spinSlow 4s linear infinite;
-      border-color: rgba(255, 153, 20, 0.65);
+      border-color: rgba(255, 153, 20, 0.7);
     }
 
-    /* Progress / Orbit Arc */
     .orbit-ring {
       position: absolute;
-      width: 184px;
-      height: 184px;
+      width: 178px;
+      height: 178px;
       border-radius: 50%;
-      border: 2.5px solid rgba(255, 153, 20, 0.15);
+      border: 2.5px solid rgba(255, 153, 20, 0.16);
       border-top-color: var(--orange-primary);
       border-left-color: var(--orange-primary);
       transform: rotate(-35deg);
     }
 
     .scanning .orbit-ring {
-      animation: spinFast 1.1s linear infinite;
+      animation: spinFast 1.05s linear infinite;
     }
 
-    /* Main Orange Scan Button */
     .scan-btn {
-      width: 152px;
-      height: 152px;
+      width: 148px;
+      height: 148px;
       border-radius: 50%;
       border: none;
       background: radial-gradient(circle at 35% 30%, #ffbe3b, #ff930f 65%, #e07200 100%);
@@ -155,7 +361,7 @@
       cursor: pointer;
       position: relative;
       z-index: 2;
-      transition: transform 0.15s ease, box-shadow 0.2s ease;
+      transition: transform 0.15s ease;
     }
 
     .scan-btn:active {
@@ -163,16 +369,16 @@
     }
 
     .scan-btn svg {
-      width: 34px;
-      height: 34px;
-      margin-bottom: 8px;
+      width: 32px;
+      height: 32px;
+      margin-bottom: 6px;
       color: #141210;
     }
 
     .scan-btn span {
-      font-size: 16px;
+      font-size: 14.5px;
       font-weight: 800;
-      letter-spacing: 2.2px;
+      letter-spacing: 1.8px;
       color: #141210;
     }
 
@@ -188,7 +394,7 @@
       font-size: 13px;
       font-weight: 500;
       color: #d4d4dc;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       text-align: center;
       min-height: 18px;
     }
@@ -196,8 +402,8 @@
     /* 4-Step Progress Bar */
     .steps-container {
       width: 100%;
-      padding: 0 8px;
-      margin-bottom: 8px;
+      padding: 0 6px;
+      margin-bottom: 6px;
     }
 
     .steps-track {
@@ -220,7 +426,7 @@
     .steps-line-fill {
       position: absolute;
       left: 0;
-      width: 100%;
+      width: 66.6%;
       height: 2.5px;
       background: var(--orange-primary);
       z-index: 2;
@@ -233,12 +439,18 @@
       border-radius: 50%;
       background: #2b2b34;
       z-index: 3;
-      transition: background 0.3s, box-shadow 0.3s;
+      transition: all 0.3s ease;
     }
 
     .step-dot.active {
       background: var(--orange-primary);
       box-shadow: 0 0 10px rgba(255, 153, 20, 0.7);
+    }
+
+    .step-dot.current {
+      background: #121216;
+      border: 3px solid var(--orange-primary);
+      box-shadow: 0 0 12px rgba(255, 153, 20, 0.85);
     }
 
     .steps-labels {
@@ -258,8 +470,8 @@
     .sub-caption {
       font-size: 11px;
       color: var(--text-dim);
-      margin-top: 8px;
-      margin-bottom: 14px;
+      margin-top: 6px;
+      margin-bottom: 12px;
       text-align: center;
     }
 
@@ -270,7 +482,7 @@
       border: 1px solid #2b2225;
       border-radius: 18px;
       padding: 16px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       transition: border-color 0.3s ease, background 0.3s ease;
     }
 
@@ -438,6 +650,7 @@
       border: 1px solid var(--card-border);
       border-radius: 18px;
       padding: 14px 16px;
+      margin-bottom: 10px;
     }
 
     .session-header {
@@ -511,22 +724,29 @@
       letter-spacing: 0.5px;
       color: var(--text-muted);
     }
+
+    .footer-note {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-align: center;
+      margin-top: 2px;
+    }
   </style>
 </head>
 <body>
   <div class="app-container">
-    <!-- Header -->
-    <div class="header">
-      <button class="header-btn" id="closeBtn" title="Close">
+    <!-- Mini App Top Bar -->
+    <div class="top-bar">
+      <button class="top-btn" id="closeBtn" title="Close">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
           <path d="M18 6L6 18M6 6l12 12"/>
         </svg>
       </button>
-      <div class="header-title">
+      <div class="top-title">
         <h1>UAE scanner</h1>
         <span>mini app</span>
       </div>
-      <button class="header-btn" id="resetStatsBtn" title="Reset Session">
+      <button class="top-btn" id="resetStatsBtn" title="Reset Session">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
           <circle cx="5" cy="12" r="2"/>
           <circle cx="12" cy="12" r="2"/>
@@ -535,23 +755,78 @@
       </button>
     </div>
 
+    <!-- Signal Desk Header -->
+    <div class="desk-header">
+      <div class="brand-left">
+        <div class="brand-logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L14 14H10L12 2z"/>
+            <path d="M8 18h8M6 21h12"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-name">UAE Scanner</div>
+          <div class="brand-sub">SIGNAL DESK</div>
+        </div>
+      </div>
+      <div class="desk-right">
+        <span class="admin-badge">ADMIN</span>
+        <span class="live-clock-pill" id="liveClockPill">00:00:00 Thailand GMT+7</span>
+      </div>
+    </div>
+
+    <!-- Pair Selector -->
+    <div class="pair-selector-wrap">
+      <div class="pair-box" id="pairBox">
+        <div class="pair-left">
+          <div class="flag-circle" id="pairFlag">🇧🇷</div>
+          <div>
+            <div class="pair-category">Forex · OTC</div>
+            <div class="pair-title-row">
+              <span class="pair-name" id="selectedPairName">USD/BRL</span>
+              <span class="otc-tag">OTC</span>
+            </div>
+          </div>
+        </div>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8a8a98" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 9l6 6 6-6"/>
+        </svg>
+      </div>
+
+      <div class="pair-dropdown" id="pairDropdown">
+        <div class="pair-option" data-pair="USD/BRL" data-flag="🇧🇷"><span>USD/BRL OTC</span><span>Forex · OTC</span></div>
+        <div class="pair-option" data-pair="EUR/USD" data-flag="🇪🇺"><span>EUR/USD OTC</span><span>Forex · OTC</span></div>
+        <div class="pair-option" data-pair="GBP/JPY" data-flag="🇯🇵"><span>GBP/JPY OTC</span><span>Forex · OTC</span></div>
+        <div class="pair-option" data-pair="AUD/CAD" data-flag="🇨🇦"><span>AUD/CAD OTC</span><span>Forex · OTC</span></div>
+        <div class="pair-option" data-pair="USD/JPY" data-flag="🇯🇵"><span>USD/JPY OTC</span><span>Forex · OTC</span></div>
+        <div class="pair-option" data-pair="EUR/GBP" data-flag="🇬🇧"><span>EUR/GBP OTC</span><span>Forex · OTC</span></div>
+      </div>
+    </div>
+
+    <!-- Timeframe Selector -->
+    <div class="tf-bar" id="tfBar">
+      <button class="tf-btn active" data-tf="1m">1m</button>
+      <button class="tf-btn" data-tf="3m">3m</button>
+      <button class="tf-btn" data-tf="5m">5m</button>
+      <button class="tf-btn" data-tf="15m">15m</button>
+    </div>
+
     <!-- Scan Button Area -->
     <div class="scanner-wrapper" id="scannerWrapper">
       <div class="ticks-ring"></div>
       <div class="orbit-ring"></div>
       <button class="scan-btn" id="scanBtn">
-        <!-- Microchip / Processor Icon -->
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="6" y="6" width="12" height="12" rx="2"/>
           <rect x="9.5" y="9.5" width="5" height="5" rx="0.5"/>
           <path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>
         </svg>
-        <span>SCAN</span>
+        <span id="scanBtnText">SCAN</span>
       </button>
     </div>
 
     <!-- Status Message -->
-    <div class="status-banner" id="statusText">Signal ready: PUT on USD/BRL OTC · 1 min</div>
+    <div class="status-banner" id="statusText">Signal ready: PUT on USD/BRL OTC · 1m</div>
 
     <!-- 4-Step Progress -->
     <div class="steps-container">
@@ -584,7 +859,7 @@
           </div>
           <div class="direction-info">
             <h2 id="signalDir">PUT</h2>
-            <p id="signalPair">Lower · USD/BRL OTC · 1 min</p>
+            <p id="signalPair">Lower · USD/BRL OTC · 1m</p>
           </div>
         </div>
 
@@ -622,7 +897,7 @@
     <div class="session-card">
       <div class="session-header">
         <span>SESSION RESULTS</span>
-        <span id="openStatus">1 open</span>
+        <span id="openStatus">No closed signals yet</span>
       </div>
       <div class="session-grid">
         <div class="stat-box wins" id="winBox" title="Tap to record Win">
@@ -639,6 +914,8 @@
         </div>
       </div>
     </div>
+
+    <div class="footer-note">Signals you scan appear here with their result.</div>
   </div>
 
   <script>
@@ -647,8 +924,8 @@
     if (tg) {
       tg.ready();
       tg.expand(); // ขยายเต็มหน้าจอ Mini App
-      if (tg.setHeaderColor) tg.setHeaderColor('#0e0e11');
-      if (tg.setBackgroundColor) tg.setBackgroundColor('#0e0e11');
+      if (tg.setHeaderColor) tg.setHeaderColor('#0c0c0f');
+      if (tg.setBackgroundColor) tg.setBackgroundColor('#0c0c0f');
       if (tg.enableClosingConfirmation) tg.enableClosingConfirmation();
     }
 
@@ -662,11 +939,10 @@
       }
     }
 
-    // 2. Trading Pairs & Indicators Database
-    const pairs = [
-      'USD/BRL OTC', 'EUR/USD OTC', 'GBP/JPY OTC',
-      'AUD/CAD OTC', 'USD/JPY OTC', 'EUR/GBP OTC', 'NZD/USD OTC'
-    ];
+    // 2. Data & DOM Elements
+    let selectedPair = 'USD/BRL';
+    let selectedFlag = '🇧🇷';
+    let selectedTf = '1m';
 
     const putNotes = [
       'RSI neutral, trend down',
@@ -682,8 +958,15 @@
       'Strong buyer volume detected'
     ];
 
-    // DOM Elements
+    const liveClockPill = document.getElementById('liveClockPill');
+    const pairBox = document.getElementById('pairBox');
+    const pairDropdown = document.getElementById('pairDropdown');
+    const pairFlag = document.getElementById('pairFlag');
+    const selectedPairName = document.getElementById('selectedPairName');
+    const tfBtns = document.querySelectorAll('.tf-btn');
+
     const scanBtn = document.getElementById('scanBtn');
+    const scanBtnText = document.getElementById('scanBtnText');
     const scannerWrapper = document.getElementById('scannerWrapper');
     const statusText = document.getElementById('statusText');
     const stepsFill = document.getElementById('stepsFill');
@@ -706,63 +989,68 @@
     const lossesCountEl = document.getElementById('lossesCount');
     const winRateTextEl = document.getElementById('winRateText');
 
-    // State
     let isScanning = false;
     let countdownInterval = null;
     let secondsRemaining = 35;
     let totalCountdown = 60;
-    const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * 29; // ~182.21
+    const CIRCLE_CIRCUMFERENCE = 2 * Math.PI * 29;
 
     let wins = 0;
     let losses = 0;
 
-    // 3. Get Real-Time Bangkok (GMT+7) Date Object
+    // 3. Real-Time Bangkok (GMT+7) Clock & Entry Time
     function getBangkokNow() {
       const now = new Date();
       const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
       return new Date(utcMs + (7 * 3600000));
     }
 
-    // 4. Calculate Real Next Entry Time (GMT+7) & Exact Seconds Remaining
+    function formatHMS(dateObj) {
+      const hh = String(dateObj.getHours()).padStart(2, '0');
+      const mm = String(dateObj.getMinutes()).padStart(2, '0');
+      const ss = String(dateObj.getSeconds()).padStart(2, '0');
+      return `${hh}:${mm}:${ss}`;
+    }
+
+    function updateHeaderClock() {
+      const bkkNow = getBangkokNow();
+      liveClockPill.textContent = `${formatHMS(bkkNow)} Thailand GMT+7`;
+    }
+    updateHeaderClock();
+    setInterval(updateHeaderClock, 1000);
+
     function getNextEntryTimeBangkok() {
       const bkkDate = getBangkokNow();
       const currentSec = bkkDate.getSeconds();
-
-      // ถ้าเหลือเวลาน้อยกว่า 10 วินาที ให้ขยับไปเข้าต้นนาทีถัดไปอีก 1 นาที (รวม ~1 นาทีกว่า) เพื่อไม่ให้กดเข้าออเดอร์ไม่ทัน
       const addMins = currentSec > 50 ? 2 : 1;
+
       const targetTime = new Date(bkkDate.getTime());
       targetTime.setMinutes(targetTime.getMinutes() + addMins);
       targetTime.setSeconds(0, 0);
-
-      const hh = String(targetTime.getHours()).padStart(2, '0');
-      const mm = String(targetTime.getMinutes()).padStart(2, '0');
-      const ss = String(targetTime.getSeconds()).padStart(2, '0');
 
       const diffMs = targetTime.getTime() - bkkDate.getTime();
       const secToEntry = Math.max(1, Math.round(diffMs / 1000));
 
       return {
-        formattedTime: `${hh}:${mm}:${ss}`,
+        formattedTime: formatHMS(targetTime),
         secondsUntil: secToEntry
       };
     }
 
-    // 5. Countdown Timer Function
+    // 4. Countdown Timer
     function updateCountdownUI() {
       const mins = String(Math.floor(secondsRemaining / 60)).padStart(2, '0');
       const secs = String(secondsRemaining % 60).padStart(2, '0');
       countdownText.textContent = `${mins}:${secs}`;
 
       const fraction = Math.max(0, secondsRemaining / totalCountdown);
-      const offset = CIRCLE_CIRCUMFERENCE * (1 - fraction);
-      countdownRing.style.strokeDashoffset = offset;
+      countdownRing.style.strokeDashoffset = CIRCLE_CIRCUMFERENCE * (1 - fraction);
     }
 
     function startCountdown(seconds) {
       clearInterval(countdownInterval);
       secondsRemaining = seconds;
       totalCountdown = Math.max(seconds, 60);
-      openStatus.textContent = '1 open';
       updateCountdownUI();
 
       countdownInterval = setInterval(() => {
@@ -771,7 +1059,6 @@
           secondsRemaining = 0;
           updateCountdownUI();
           clearInterval(countdownInterval);
-          openStatus.textContent = '0 open';
           triggerHaptic('warning');
         } else {
           updateCountdownUI();
@@ -779,18 +1066,62 @@
       }, 1000);
     }
 
-    // ตั้งค่าเวลา ENTRY และตัวนับถอยหลังให้ตรงกับเวลาจริง (GMT+7) ตั้งแต่เปิดแอป
     const initialEntry = getNextEntryTimeBangkok();
     entryTimeText.textContent = initialEntry.formattedTime;
     startCountdown(initialEntry.secondsUntil);
 
-    // 6. Step Progress Helper
-    function setStepProgress(stepIndex) {
+    // 5. Pair Dropdown & Timeframe Controls
+    pairBox.addEventListener('click', (e) => {
+      e.stopPropagation();
+      pairDropdown.classList.toggle('open');
+      triggerHaptic('light');
+    });
+
+    document.querySelectorAll('.pair-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        selectedPair = opt.dataset.pair;
+        selectedFlag = opt.dataset.flag;
+        selectedPairName.textContent = selectedPair;
+        pairFlag.textContent = selectedFlag;
+        pairDropdown.classList.remove('open');
+        statusText.textContent = `Ready to scan ${selectedPair} OTC · ${selectedTf}`;
+        triggerHaptic('medium');
+      });
+    });
+
+    document.addEventListener('click', () => {
+      pairDropdown.classList.remove('open');
+    });
+
+    tfBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tfBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedTf = btn.dataset.tf;
+        statusText.textContent = `Ready to scan ${selectedPair} OTC · ${selectedTf}`;
+        triggerHaptic('light');
+      });
+    });
+
+    // 6. 4-Step Progress Helper (MARKET -> INDICATORS -> ANALYSIS -> SIGNAL)
+    function setStepProgress(stepIndex, isScanningActive = false) {
       const widths = ['0%', '33.3%', '66.6%', '100%'];
       stepsFill.style.width = widths[stepIndex];
+
       dots.forEach((dot, idx) => {
-        dot.classList.toggle('active', idx <= stepIndex);
-        labels[idx].classList.toggle('active', idx <= stepIndex);
+        dot.classList.remove('active', 'current');
+        labels[idx].classList.remove('active');
+        if (idx < stepIndex) {
+          dot.classList.add('active');
+          labels[idx].classList.add('active');
+        } else if (idx === stepIndex) {
+          if (isScanningActive) {
+            dot.classList.add('current');
+          } else {
+            dot.classList.add('active');
+          }
+          labels[idx].classList.add('active');
+        }
       });
     }
 
@@ -801,24 +1132,27 @@
       triggerHaptic('heavy');
 
       scannerWrapper.classList.add('scanning');
-      setStepProgress(0);
-      statusText.textContent = 'Scanning market liquidity...';
+      scanBtnText.textContent = 'SCANNING';
+
+      setStepProgress(0, true);
+      statusText.textContent = `Connecting to ${selectedPair} OTC feed...`;
 
       setTimeout(() => {
-        setStepProgress(1);
-        statusText.textContent = 'Reading RSI, EMA & Stochastic...';
+        setStepProgress(1, true);
+        statusText.textContent = 'Calculating RSI, EMA & momentum...';
         triggerHaptic('light');
       }, 550);
 
       setTimeout(() => {
-        setStepProgress(2);
-        statusText.textContent = 'Analyzing OTC price action...';
+        setStepProgress(2, true);
+        statusText.textContent = 'Analyzing the chart...';
         triggerHaptic('light');
       }, 1100);
 
       setTimeout(() => {
-        setStepProgress(3);
+        setStepProgress(3, false);
         scannerWrapper.classList.remove('scanning');
+        scanBtnText.textContent = 'SCAN';
         generateNewSignal();
         isScanning = false;
         triggerHaptic('success');
@@ -827,24 +1161,24 @@
 
     function generateNewSignal() {
       const isCall = Math.random() > 0.5;
-      const pair = pairs[Math.floor(Math.random() * pairs.length)];
-      const confidence = Math.floor(Math.random() * 24) + 68; // 68% - 91%
+      const confidence = Math.floor(Math.random() * 24) + 68;
       const entryData = getNextEntryTimeBangkok();
+      const fullPairLabel = `${selectedPair} OTC`;
 
       if (isCall) {
         signalCard.classList.add('call-theme');
         signalDir.textContent = 'CALL';
-        signalPair.textContent = `Higher · ${pair} · 1 min`;
+        signalPair.textContent = `Higher · ${fullPairLabel} · ${selectedTf}`;
         dirArrow.innerHTML = '<path d="M12 19V5M5 12l7-7 7 7"/>';
         indicatorNote.textContent = callNotes[Math.floor(Math.random() * callNotes.length)];
-        statusText.textContent = `Signal ready: CALL on ${pair} · 1 min`;
+        statusText.textContent = `Signal ready: CALL on ${fullPairLabel} · ${selectedTf}`;
       } else {
         signalCard.classList.remove('call-theme');
         signalDir.textContent = 'PUT';
-        signalPair.textContent = `Lower · ${pair} · 1 min`;
+        signalPair.textContent = `Lower · ${fullPairLabel} · ${selectedTf}`;
         dirArrow.innerHTML = '<path d="M12 5v14M19 12l-7 7-7-7"/>';
         indicatorNote.textContent = putNotes[Math.floor(Math.random() * putNotes.length)];
-        statusText.textContent = `Signal ready: PUT on ${pair} · 1 min`;
+        statusText.textContent = `Signal ready: PUT on ${fullPairLabel} · ${selectedTf}`;
       }
 
       entryTimeText.textContent = entryData.formattedTime;
@@ -852,13 +1186,14 @@
       startCountdown(entryData.secondsUntil);
     }
 
-    // 8. Interactive Session Results (Tap Wins/Losses to track)
+    // 8. Session Results Tracking
     function updateSessionStats() {
       winsCountEl.textContent = wins;
       lossesCountEl.textContent = losses;
       const total = wins + losses;
       const rate = total === 0 ? 0 : Math.round((wins / total) * 100);
       winRateTextEl.textContent = `${rate}%`;
+      openStatus.textContent = total === 0 ? 'No closed signals yet' : `${total} closed signal${total > 1 ? 's' : ''}`;
     }
 
     document.getElementById('winBox').addEventListener('click', () => {
