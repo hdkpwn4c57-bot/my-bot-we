@@ -4,17 +4,14 @@ from aiohttp import web
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, WebAppInfo, MenuButtonWebApp
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-# ==========================================
-# ตั้งค่าข้อมูลสำคัญ (แก้ไขตรงนี้หรือใส่ใน Environment Variables)
-# ==========================================
-TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "YOUR_TELEGRAM_BOT_TOKEN")
-# ใส่ลิงก์ HTTPS ของเซิร์ฟเวอร์คุณ (เช่น https://onrender.com หรือลิงก์จาก ngrok)
-PUBLIC_URL = os.environ.get("PUBLIC_URL", "https://your-domain.com")
+# 1. นำ Token จาก @BotFather มาวางแทนที่คำว่า ใส่_TOKEN_ของคุณที่นี่
+TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "ใส่_TOKEN_ของคุณที่นี่")
+
+# 2. นำลิงก์ HTTPS ของเว็บคุณมาวางแทนที่คำว่า ใส่ลิงก์_HTTPS_ของคุณที่นี่
+PUBLIC_URL = os.environ.get("PUBLIC_URL", "ใส่ลิงก์_HTTPS_ของคุณที่นี่")
+
 PORT = int(os.environ.get("PORT", 8080))
 
-# ==========================================
-# โค้ดหน้าเว็บแอปพลิเคชัน (HTML + CSS + JS)
-# ==========================================
 HTML_PAGE = """<!DOCTYPE html>
 <html lang="th">
 <head>
@@ -305,3 +302,14 @@ HTML_PAGE = """<!DOCTYPE html>
         .btn-Menu { background: #1e8449; }
         .dots-icon {
             display: grid;
+            grid-template-columns: repeat(3, 4px);
+            gap: 3px;
+        }
+        .dots-icon span {
+            width: 4px;
+            height: 4px;
+            background: #fff;
+            border-radius: 1px;
+        }
+        .modal-overlay {
+            display: none;
