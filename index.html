@@ -1,358 +1,205 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>OG Horizontal UD - Stats & MM</title>
-    <script src="https://telegram.org"></script>
-    <style>
-        :root {
-            --bg-color: #f4f4f6;
-            --header-green: #8fd19e;
-            --sub-green: #b7e4c7;
-            --dark-green: #1b4332;
-            --player-blue: #3498db;
-            --banker-red: #e74c3c;
-            --tie-green: #2ecc71;
-            --skip-orange: #f39c12;
-            --wait-gray: #7f8c8d;
-            --stake-dark: #2c3e50;
-        }
+import os
+import logging
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import Application, CallbackQueryHandler, CommandHandler, ContextTypes
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            user-select: none;
-        }
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
+)
 
-        body {
-            background-color: var(--bg-color);
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
+# ใส่ Token ของคุณที่นี่ (หรือตั้งค่าผ่าน Environment Variable ชื่อ TELEGRAM_BOT_TOKEN)
+TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "YOUR_TELEGRAM_BOT_TOKEN")
 
-        /* Top Bar */
-        .top-bar {
-            background: #fff;
-            padding: 10px 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #ddd;
-            font-weight: bold;
-            font-size: 15px;
-        }
+user_sessions = {}
 
-        .top-icons span {
-            margin-left: 12px;
-            cursor: pointer;
-            font-size: 18px;
-        }
+def init_session(start_bal=255.00, base_bet=1.00):
+    return {
+        "history": [],       # ประวัติไพ่: P, B, T
+        "wl_history": [],    # ประวัติผลไม้: W, L, -
+        "start_bal": float(start_bal),
+        "now_bal": float(start_bal),
+        "base": float(base_bet),
+        "step": 1,
+        "units": 0,
+        "wait_cooldown": 0   # พักไม้หลังชนะ
+    }
 
-        /* Road Tabs */
-        .road-tabs {
-            display: flex;
-            background: var(--sub-green);
-            text-align: center;
-            font-size: 13px;
-            font-weight: 600;
-        }
+def analyze_next_move(s):
+    """วิเคราะห์ไม้ต่อไปจากประวัติไพ่"""
+    pb_only = [x for x in s["history"] if x in ["P", "B"]]
+    
+    # รอเก็บข้อมูลครบ 6 ตาแรก หรือกำลังอยู่ในช่วงพักไม้ (WAIT)
+    if len(pb_only) < 6 or s["wait_cooldown"] > 0:
+        return "WAIT", False
+    
+    # วิเคราะห์สูตร CHOP (แทงสลับจากตาสุดท้าย)
+    last_side = pb_only[-1]
+    next_side = "BANKER" if last_side == "P" else "PLAYER"
+    return next_side, True
 
-        .road-tab {
-            flex: 1;
-            padding: 6px;
-            border-bottom: 3px solid transparent;
-        }
+def process_move(s, action):
+    """ประมวลผลเมื่อผู้ใช้กดปุ่ม P, B หรือ T"""
+    signal_side, is_active = analyze_next_move(s)
 
-        .road-tab.active {
-            border-bottom: 3px solid var(--dark-green);
-            background: var(--header-green);
-        }
+    # กรณีออกเสมอ (T) -> ไม่ได้ไม่เสีย บันทึก '-'
+    if action == "T":
+        s["wl_history"].append("-")
+        s["history"].append("T")
+        return
 
-        /* Big Road Canvas Area */
-        .roadmap-container {
-            flex: 1;
-            background: #fff;
-            display: flex;
-            overflow-x: auto;
-            border-bottom: 1px solid #ccc;
-            padding: 8px;
-            position: relative;
-        }
+    # กรณีออก P หรือ B
+    if is_active:
+        current_stake = s["base"] * (2 ** (s["step"] - 1))
+        predicted = "P" if signal_side == "PLAYER" else "B"
 
-        .road-grid {
-            display: grid;
-            grid-template-rows: repeat(6, 22px);
-            grid-auto-flow: column;
-            grid-auto-columns: 22px;
-            gap: 2px;
-        }
+        if action == predicted:
+            # ชนะ (W): บวก 1 Unit, คำนวณกำไร (Banker หัก 5%), รีเซ็ต Step และเข้าโหมด WAIT 1 ตา
+            payout = current_stake * 0.95 if predicted == "B" else current_stake
+            s["now_bal"] += payout
+            s["units"] += 1
+            s["step"] = 1
+            s["wl_history"].append("W")
+            s["wait_cooldown"] = 1
+        else:
+            # แพ้ (L): ลบ 1 Unit, หักทุน, ขยับ Step ทบไม้ถัดไป
+            s["now_bal"] -= current_stake
+            s["units"] -= 1
+            s["step"] += 1
+            s["wl_history"].append("L")
+    else:
+        # ช่วง WAIT (ไม่มีไม้)
+        s["wl_history"].append("-")
+        if s["wait_cooldown"] > 0:
+            s["wait_cooldown"] -= 1
 
-        .road-cell {
-            width: 22px;
-            height: 22px;
-            border: 1px solid #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
+    s["history"].append(action)
 
-        .circle-P {
-            width: 18px;
-            height: 18px;
-            border: 3px solid var(--player-blue);
-            border-radius: 50%;
-        }
+def get_keyboard():
+    return InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("🔵 P (เพลเยอร์)", callback_data="P"),
+            InlineKeyboardButton("🔴 B (แบงค์เกอร์)", callback_data="B"),
+            InlineKeyboardButton("🟢 T (เสมอ)", callback_data="T"),
+        ],
+        [
+            InlineKeyboardButton("↩️ ย้อนกลับ (Undo)", callback_data="UNDO"),
+            InlineKeyboardButton("🔄 ล้างกระดาน (Reset)", callback_data="RESET"),
+        ]
+    ])
 
-        .circle-B {
-            width: 18px;
-            height: 18px;
-            border: 3px solid var(--banker-red);
-            border-radius: 50%;
-        }
+def render_message(chat_id):
+    s = user_sessions.get(chat_id, init_session())
+    
+    p_count = s["history"].count("P")
+    b_count = s["history"].count("B")
+    t_count = s["history"].count("T")
+    total_hand = len(s["history"])
 
-        .tie-slash {
-            position: absolute;
-            width: 16px;
-            height: 2px;
-            background-color: var(--tie-green);
-            transform: rotate(-45deg);
-        }
+    # คำนวณเปอร์เซ็นต์การออกไพ่
+    p_pct = (p_count / total_hand * 100) if total_hand > 0 else 0
+    b_pct = (b_count / total_hand * 100) if total_hand > 0 else 0
 
-        /* Skip History Pills */
-        .skip-bar {
-            display: flex;
-            justify-content: flex-end;
-            gap: 4px;
-            padding: 4px 10px;
-            background: #fff;
-        }
+    # สถิติ W / L
+    wins = s["wl_history"].count("W")
+    losses = s["wl_history"].count("L")
+    total_bets = wins + losses
+    win_rate = int(round((wins / total_bets) * 100)) if total_bets > 0 else 0
 
-        .skip-pill {
-            width: 32px;
-            height: 18px;
-            background: #888;
-            color: #fff;
-            border-radius: 9px;
-            font-size: 11px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    # วิเคราะห์ไม้ต่อไป
+    next_side, is_active = analyze_next_move(s)
+    if not is_active:
+        signal_display = "⚪️ WAIT (ไม่มีไม้ - รอจังหวะ)"
+        stake_display = "0.00"
+    else:
+        icon = "🔵" if next_side == "PLAYER" else "🔴"
+        signal_display = f"{icon} **{next_side}**"
+        stake_val = s["base"] * (2 ** (s["step"] - 1))
+        stake_display = f"{stake_val:.2f} (ไม้ที่ {s['step']})"
 
-        /* Stats Row */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
-            gap: 3px;
-            padding: 4px 6px;
-            background: #fff;
-            text-align: center;
-        }
+    profit = s["now_bal"] - s["start_bal"]
+    recent_road = " ".join(s["history"][-12:]) if s["history"] else "ยังไม่มีข้อมูล"
+    recent_wl = " ".join(s["wl_history"][-10:]) if s["wl_history"] else "-"
 
-        .stat-box {
-            border-radius: 4px;
-            overflow: hidden;
-            border: 1px solid #e0e0e0;
-        }
+    return (
+        f"🎰 **ระบบวิเคราะห์ไม้ & เดินเงิน (RIGEL MM)**\n"
+        f"━━━━━━━━━━━━━━━━━━━━\n"
+        f"🔵 P: `{p_count}` ({p_pct:.0f}%) | 🔴 B: `{b_count}` ({b_pct:.0f}%) | 🟢 T: `{t_count}` | ตาที่: `{total_hand}`\n"
+        f"🎯 ชนะ: `{wins}` | แพ้: `{losses}` | Win Rate: `{win_rate}%`\n"
+        f"━━━━━━━━━━━━━━━━━━━━\n"
+        f"📡 **วิเคราะห์ไม้ต่อไป:** {signal_display}\n"
+        f"💵 **ยอดเดินเงิน (STAKE):** `{stake_display}`\n"
+        f"━━━━━━━━━━━━━━━━━━━━\n"
+        f"💰 ทุน: `{s['start_bal']:.2f}` ➔ ปัจจุบัน: `{s['now_bal']:.2f}`\n"
+        f"📊 Units: `{s['units']:+d}` | กำไรสุทธิ: `{profit:+.2f}`\n"
+        f"━━━━━━━━━━━━━━━━━━━━\n"
+        f"🛣 **เค้าไพ่ล่าสุด:** `{recent_road}`\n"
+        f"📝 **ผลไม้ (W/L):** `{recent_wl}`\n\n"
+        f"⚙️ *ตั้งค่าทุนพิมพ์ `/set 1000 10` (ทุน 1000 ไม้แรก 10)*"
+    )
 
-        .stat-header {
-            font-size: 11px;
-            padding: 3px;
-            color: #fff;
-            font-weight: 600;
-        }
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    user_sessions[chat_id] = init_session()
+    await update.message.reply_text(
+        render_message(chat_id),
+        reply_markup=get_keyboard(),
+        parse_mode="Markdown"
+    )
 
-        .bg-green-light { background: var(--header-green); color: #111; }
-        .bg-blue { background: var(--player-blue); }
-        .bg-red { background: var(--banker-red); }
-        .bg-green { background: var(--tie-green); }
+async def set_money(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.effective_chat.id
+    try:
+        start_bal = float(context.args)
+        base_bet = float(context.args)
+        user_sessions[chat_id] = init_session(start_bal, base_bet)
+        await update.message.reply_text(
+            render_message(chat_id),
+            reply_markup=get_keyboard(),
+            parse_mode="Markdown"
+        )
+    except (IndexError, ValueError):
+        await update.message.reply_text(
+            "❌ วิธีตั้งค่า: พิมพ์ `/set [ทุนเริ่มต้น] [เงินไม้แรก]`\nตัวอย่าง: `/set 500 5`",
+            parse_mode="Markdown"
+        )
 
-        .stat-val {
-            font-size: 13px;
-            padding: 4px;
-            font-weight: bold;
-            background: #fff;
-        }
+async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    chat_id = query.message.chat_id
+    action = query.data
 
-        /* Signal & Stake Banner */
-        .signal-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4px;
-            padding: 2px 6px;
-        }
+    if chat_id not in user_sessions:
+        user_sessions[chat_id] = init_session()
 
-        .signal-box {
-            border-radius: 6px;
-            padding: 8px;
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-            min-height: 62px;
-            transition: background 0.2s;
-        }
+    s = user_sessions[chat_id]
 
-        .signal-wait { background: var(--wait-gray); }
-        .signal-P { background: var(--player-blue); }
-        .signal-B { background: var(--banker-red); }
-        .stake-box { background: var(--stake-dark); text-align: center; justify-content: center; }
+    if action == "RESET":
+        user_sessions[chat_id] = init_session(s["start_bal"], s["base"])
+    elif action == "UNDO":
+        if s["history"]:
+            old_hist = s["history"][:-1]
+            user_sessions[chat_id] = init_session(s["start_bal"], s["base"])
+            for move in old_hist:
+                process_move(user_sessions[chat_id], move)
+    elif action in ["P", "B", "T"]:
+        process_move(s, action)
 
-        .signal-meta {
-            display: flex;
-            justify-content: space-between;
-            font-size: 10px;
-            opacity: 0.9;
-        }
+    await query.edit_message_text(
+        text=render_message(chat_id),
+        reply_markup=get_keyboard(),
+        parse_mode="Markdown"
+    )
 
-        .signal-main {
-            font-size: 20px;
-            font-weight: 800;
-            text-align: center;
-            letter-spacing: 0.5px;
-        }
+def main():
+    if TOKEN == "YOUR_TELEGRAM_BOT_TOKEN":
+        print("⚠️ คำเตือน: กรุณาใส่ TELEGRAM_BOT_TOKEN ก่อนรันบอท")
+    app = Application.builder().token(TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("set", set_money))
+    app.add_handler(CallbackQueryHandler(button_callback))
+    print("✅ บอทพร้อมทำงานแล้ว...")
+    app.run_polling()
 
-        /* Step Progression */
-        .step-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4px;
-            padding: 2px 6px;
-        }
-
-        .step-box {
-            border-radius: 4px;
-            overflow: hidden;
-            text-align: center;
-            border: 1px solid #ccc;
-        }
-
-        .step-title {
-            background: var(--sub-green);
-            font-size: 11px;
-            padding: 2px;
-            font-weight: 600;
-        }
-
-        .step-val {
-            background: #fff;
-            font-size: 13px;
-            padding: 4px;
-            font-weight: bold;
-        }
-
-        .step-active .step-title { background: var(--dark-green); color: #fff; }
-        .step-active .step-val { background: #2d6a4f; color: #fff; }
-
-        /* Balance Row */
-        .balance-row {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 4px;
-            padding: 4px 6px;
-        }
-
-        /* Bottom Controls */
-        .controls {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: 12px 10px 20px;
-            background: #f8f9fa;
-            border-top: 1px solid #ddd;
-        }
-
-        .btn-circle {
-            width: 58px;
-            height: 58px;
-            border-radius: 50%;
-            border: 3px solid #fff;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
-            color: #fff;
-            font-size: 22px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.1s;
-        }
-
-        .btn-circle:active {
-            transform: scale(0.92);
-        }
-
-        .btn-P { background: var(--player-blue); }
-        .btn-B { background: var(--banker-red); }
-        .btn-T { background: var(--tie-green); }
-        .btn-S { background: var(--skip-orange); }
-        .btn-R { background: var(--dark-green); font-size: 14px; }
-    </style>
-</head>
-<body>
-
-    <div class="top-bar">
-        <div>☰ &nbsp; OG Horizontal UD</div>
-        <div class="top-icons">
-            <span onclick="undoLast()" title="ย้อนกลับ">↩️</span>
-            <span onclick="configSettings()" title="ตั้งค่าทุน">⚙️</span>
-        </div>
-    </div>
-
-    <div class="road-tabs">
-        <div class="road-tab active">Big Road</div>
-        <div class="road-tab">Bead Road</div>
-    </div>
-
-    <div class="roadmap-container">
-        <div class="road-grid" id="roadGrid"></div>
-    </div>
-
-    <div class="skip-bar" id="skipBar">
-        <div class="skip-pill">-</div>
-        <div class="skip-pill">-</div>
-        <div class="skip-pill">-</div>
-        <div class="skip-pill">-</div>
-        <div class="skip-pill">-</div>
-        <div class="skip-pill">-</div>
-    </div>
-
-    <div class="stats-grid">
-        <div class="stat-box">
-            <div class="stat-header bg-green-light">Parity</div>
-            <div class="stat-val" id="parityVal">0 : 0 : 0</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-header bg-blue">Player</div>
-            <div class="stat-val" id="pCount">0</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-header bg-red">Banker</div>
-            <div class="stat-val" id="bCount">0</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-header bg-green">Tie</div>
-            <div class="stat-val" id="tCount">0</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-header bg-green-light">Hand</div>
-            <div class="stat-val" id="handCount">0</div>
-        </div>
-    </div>
-
-    <div class="signal-row">
-        <div class="signal-box signal-wait" id="signalBox">
-            <div class="signal-meta">
-                <span id="strategyLabel">CHOP</span>
-                <span id="statusLabel">OFF</span>
-            </div>
-            <div class="signal-main" id="signalText">WAIT</div>
-            <div class="signal-meta">
-                <span>RIGEL MM</span>
+if __name__ == "__main__":
+    main()
